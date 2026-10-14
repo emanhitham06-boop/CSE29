@@ -43,6 +43,10 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 .lec.new b{color:var(--new)}
 .lec.off{opacity:.4;pointer-events:none}
 .pic{display:block;border:2px solid #fff4;border-radius:16px;overflow:hidden;color:var(--text);text-decoration:none;text-align:center;padding-bottom:10px;font-size:14px}.pic span{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;background:#151515;color:#555;margin-bottom:8px}.pic img{width:100%;height:100%;object-fit:cover}
+.drive{display:block;border-color:var(--blue);padding:38px 20px;text-align:center;font-size:26px;color:var(--text);text-decoration:none}
+.drive small{display:block;color:var(--mute);font-size:14px;margin-top:4px}
+.drive.off{opacity:.4;pointer-events:none}
+.drive:focus-visible{outline:3px solid var(--gold2);outline-offset:3px}
 .empty{color:var(--mute);text-align:center;padding:14px}
 @media (prefers-reduced-motion:reduce){.panel{transition:none}html{scroll-behavior:auto}}
 </style>
@@ -55,12 +59,16 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 <main>
   <section class="box notes" id="news"><h2>Important Notes</h2><div id="notes"></div></section>
   <section id="courses" style="display:flex;flex-direction:column;gap:28px"></section>
+  <a class="box drive" id="drive" href="#" target="_blank" rel="noopener">Drive<small>Year Drive</small></a>
 </main>
 <script>
 // ===== Google Sheet links (Publish to web > CSV). Leave empty to use demo data =====
 const B='https://docs.google.com/spreadsheets/d/e/2PACX-1vSzntZlO9ctfLIIfK6VcZOGT4EpUB10PC86KgNJbkLfpFMofiCGKPwzLL9kzZ7OVo4Wjr6VvdXz2p6K/pub?single=true&output=csv&gid=';
 const SHEET={courses:B+'1871267128',content:B+'0',news:B+'465799816'};
-const BOARD=['logic','elec','field']; // courses that have a Board tab
+const BOARD=['logic','elec'];            // courses that have a Board tab
+const HIDE={isalmic:['section'],islamic:['section']}; // tabs hidden per course
+const NEW_DAYS=6;                         // a card stays yellow/NEW for this many days
+const DRIVE_URL='';                       // paste the yearly Google Drive link here
 
 const d=n=>{const x=new Date();x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
 const DEMO={
@@ -98,10 +106,11 @@ const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 function img(u){const m=String(u).match(/(?:\/d\/|id=)([\w-]{20,})/);return m?'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w900':u}
 function pic(i){i.image_link=i.image_link||i.link||'';return `<a class="pic" href="${esc(i.image_link||'#')}" target="_blank" rel="noopener"><span>${i.image_link?`<img src="${esc(img(i.image_link))}" alt="${esc(i.title)}" loading="lazy">`:'Photo'}</span>${esc(i.title)}</a>`}
 function card(i){
- const isNew=i.date&&daysFrom(i.date)>=-7, u=i.link||i.lecture_link||i.resources_link||'',ok=!!u;
+ const isNew=i.date&&daysFrom(i.date)>=-NEW_DAYS, u=i.link||i.lecture_link||i.resources_link||'',ok=!!u;
  return `<a class="lec${isNew?' new':''}${ok?'':' off'}" href="${ok?esc(u):'#'}" target="_blank" rel="noopener"><b>${isNew?'NEW · ':''}${i.week?'Week '+esc(i.week):''}</b>${esc(i.title)}</a>`}
 const KINDS=[['lecture','Lectures'],['section','Sections'],['resource','Resources'],['board','Board']];
 
+(()=>{const dv=document.getElementById('drive');if(DRIVE_URL)dv.href=DRIVE_URL;else dv.classList.add('off')})();
 load().then(D=>{
  const nd=document.getElementById('notes');
  const news=D.news.filter(n=>daysFrom(n.deadline)>=0).sort((a,b)=>pd(a.deadline)-pd(b.deadline));
@@ -112,7 +121,7 @@ load().then(D=>{
  const root=document.getElementById('courses');
  D.courses.forEach(c=>{
   const items=D.content.filter(x=>x.course_id==c.course_id).sort((a,b)=>b.week-a.week);
-  const ks=KINDS.filter(k=>k[0]!='board'||BOARD.includes(c.course_id));
+  const ks=KINDS.filter(k=>(k[0]!='board'||BOARD.includes(c.course_id))&&!(HIDE[c.course_id]||[]).includes(k[0]));
   const el=document.createElement('div');el.className='box course';
   el.innerHTML=`<button aria-expanded="false">${esc(c.name)}<small>${esc(c.doctor||'')}</small></button>
   <div class="panel"><div><div class="inner"><div class="tabs">${ks.map((k,i)=>`<button class="tab${i?'':' on'}" data-k="${k[0]}">${k[1]}</button>`).join('')}</div><div class="grid"></div></div></div></div>`;
