@@ -58,8 +58,8 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 <h1>CSE'29</h1>
 <main>
   <section class="box notes" id="news"><h2>Important Notes</h2><div id="notes"></div></section>
+    <a class="box drive" id="drive" href="#" target="_blank" rel="noopener">Drive<small>Year Drive</small></a>
   <section id="courses" style="display:flex;flex-direction:column;gap:28px"></section>
-  <a class="box drive" id="drive" href="#" target="_blank" rel="noopener">Drive<small>Year Drive</small></a>
 </main>
 <script>
 // ===== Google Sheet links (Publish to web > CSV). Leave empty to use demo data =====
@@ -68,7 +68,7 @@ const SHEET={courses:B+'1871267128',content:B+'0',news:B+'465799816'};
 const BOARD=['logic','elec'];            // courses that have a Board tab
 const HIDE={isalmic:['section'],islamic:['section']}; // tabs hidden per course
 const NEW_DAYS=6;                         // a card stays yellow/NEW for this many days
-const DRIVE_URL='';                       // paste the yearly Google Drive link here
+const DRIVE_URL='https://drive.google.com/drive/folders/1blReZcJP06vn4P5b-FFlON0VRItzI0V1';                       // paste the yearly Google Drive link here
 
 const d=n=>{const x=new Date();x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
 const DEMO={
