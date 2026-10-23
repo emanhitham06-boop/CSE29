@@ -48,6 +48,11 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 .drive.off{opacity:.4;pointer-events:none}
 .drive:focus-visible{outline:3px solid var(--gold2);outline-offset:3px}
 .sched{padding:26px 18px}.sched h2{margin:0 0 16px;font-weight:400;font-size:22px;text-align:center}
+.shead{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;font-size:22px;cursor:pointer;padding:6px 0}
+.shead:focus-visible{outline:3px solid var(--gold2);outline-offset:3px}
+.sbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+.sched.open .sbody{grid-template-rows:1fr}
+.sbody>div{overflow:hidden;padding-top:16px}
 .dbar{display:flex;border:1.5px solid var(--gold);border-radius:999px;overflow:hidden}
 .dbar button{all:unset;box-sizing:border-box;flex:1 0 96px;text-align:center;padding:12px 6px;cursor:pointer;font-size:15px;border-left:1.5px solid var(--gold)}
 .dbar button:first-child{border-left:0}
@@ -74,9 +79,10 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 <h1>CSE'29</h1>
 <main>
   <section class="box notes" id="news"><h2>Important Notes</h2><div id="notes"></div></section>
-    <a class="box drive" id="drive" href="#" target="_blank" rel="noopener">Drive<small>Year Drive</small></a>
+    <section class="box sched open" id="sched"><button class="shead" id="shead" aria-expanded="true">Weekly Schedule</button><div class="sbody"><div><div class="dbar" id="dbar"></div><div class="spanel" id="spanel"><div><div id="slots"></div></div></div></div></div></section>
+  <a class="box drive" id="drive" href="#" target="_blank" rel="noopener">Drive<small>Year Drive</small></a>
   <section id="courses" style="display:flex;flex-direction:column;gap:28px"></section>
-  <section class="box sched" id="sched"><h2>Weekly Schedule</h2><div class="dbar" id="dbar"></div><div class="spanel" id="spanel"><div><div id="slots"></div></div></div></section>
+  
 </main>
 <script>
 // ===== Google Sheet links (Publish to web > CSV). Leave empty to use demo data =====
@@ -162,6 +168,7 @@ load().then(D=>{
    slots.innerHTML=l.length?l.map(s=>{const c=(s.course||s.course_id||'').trim();return `<div class="slot"><div class="srow"><b>${s.kind?`<i class="kd">${esc(s.kind.trim().toUpperCase())}</i>`:''}${esc(names[c.toLowerCase()]||c)}</b><span>${esc(s.time||'')}</span><span>${esc(s.place||'')}</span></div>${s.note?`<em class="note2">${esc(s.note)}</em>`:''}</div>`}).join(''):'<div class="empty">No sections</div>';
    pan.classList.add('open')};
   bar.appendChild(b)});
+ document.getElementById('shead').onclick=function(){const sc=document.getElementById('sched');const o=sc.classList.toggle('open');this.setAttribute('aria-expanded',o);if(!o){cur=null;pan.classList.remove('open');bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'))}};
 });
 </script>
 </body>
