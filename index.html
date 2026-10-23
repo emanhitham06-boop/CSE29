@@ -141,7 +141,7 @@ const KINDS=[['lecture','Lectures'],['section','Sections'],['resource','Resource
 load().then(D=>{
  const nd=document.getElementById('notes');
  const key=n=>{const l=n.deadline?daysFrom(n.deadline):NaN;return isNaN(l)||l<0?1e9:l};
- const news=D.news.filter(n=>(n.title||'').trim()).map((n,i)=>[n,i]).sort((a,b)=>key(a[0])-key(b[0])||a[1]-b[1]).map(x=>x[0]);
+ const news=D.news.filter(n=>(n.title||'').trim()&&!(n.deadline&&daysFrom(n.deadline)<0)).map((n,i)=>[n,i]).sort((a,b)=>key(a[0])-key(b[0])||a[1]-b[1]).map(x=>x[0]);
  nd.innerHTML=news.length?news.map(n=>{const l=n.deadline?daysFrom(n.deadline):null;
   const t=`${n.type?esc(n.type)+': ':''}${esc(n.title)}`+(n.link?' ↗':'');
   return `<div class="note"><span>${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">${t}</a>`:t}${n.course_id?`<br><small>${esc(n.course_id.toUpperCase())}</small>`:''}</span>${l===null||isNaN(l)||l<0?'':`<span class="left">${l==0?'Today':l+' days left'}</span>`}</div>`}).join(''):'<div class="empty">No notes right now</div>';
