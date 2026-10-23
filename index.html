@@ -59,6 +59,7 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 .spanel.open{grid-template-rows:1fr}.spanel>div{overflow:hidden}
 #slots{display:grid;grid-template-columns:1fr;gap:12px;padding-top:16px}
 .slot{border:2px solid #fff4;border-radius:16px;padding:14px 18px}
+.kd{display:inline-block;font-style:normal;font-size:11px;letter-spacing:.5px;color:var(--bg);background:var(--gold2);border-radius:999px;padding:1px 9px;margin-right:8px;vertical-align:middle}
 .srow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
 .slot b{font-weight:400;font-size:18px;color:var(--gold2);text-align:left}.slot .srow span{color:var(--text);font-size:15px}.slot .srow span:nth-of-type(1){text-align:center}.slot .srow span:nth-of-type(2){text-align:right;color:var(--mute)}
 .slot .note2{display:block;margin-top:8px;padding-top:8px;border-top:1px solid #2a2a2a;font-style:normal;font-size:12px;color:#6f685b;opacity:.9}
@@ -99,7 +100,7 @@ const DEMO={
   {course_id:'logic',kind:'board',title:'Board - Week 3',week:3,date:d(-2),image_link:''},
   {course_id:'db',kind:'lecture',title:'Intro to SQL',week:1,date:d(-15),lecture_link:'#',video_link:'#'},
   {course_id:'ds',kind:'lecture',title:'Arrays & Lists',week:1,date:d(-14),lecture_link:'#',video_link:'#'}],
- schedule:[{day:'Saturday',course:'logic',time:'10:00 AM',place:'Hall 3'},{day:'Saturday',course:'db',time:'12:00 PM',place:'Lab 2'},{day:'Sunday',course:'ds',time:'9:00 AM',place:'Lab 1',note:'Moved to Lab 2 this week'},{day:'Tuesday',course:'logic',time:'1:00 PM',place:'Hall 1'},{day:'Monday',course:'Electronics',time:'11:00 AM',place:'Hall 5'}],
+ schedule:[{day:'Saturday',kind:'LEC',course:'logic',time:'10:00 AM',place:'Hall 3'},{day:'Saturday',kind:'LAB',course:'db',time:'12:00 PM',place:'Lab 2'},{day:'Sunday',course:'ds',time:'9:00 AM',place:'Lab 1',note:'Moved to Lab 2 this week'},{day:'Tuesday',course:'logic',time:'1:00 PM',place:'Hall 1'},{day:'Monday',course:'Electronics',time:'11:00 AM',place:'Hall 5'}],
  news:[
   {type:'Quiz',title:'Logic Quiz 1',deadline:d(3),course_id:'logic',link:'#'},
   {type:'Assignment',title:'DB Task 1',deadline:d(6),course_id:'db'},
@@ -158,7 +159,7 @@ load().then(D=>{
   b.onclick=()=>{if(cur===k){cur=null;pan.classList.remove('open');b.classList.remove('on');return}
    cur=k;bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
    const l=(D.schedule||[]).filter(s=>(s.day||'').trim().slice(0,3).toLowerCase()==k);
-   slots.innerHTML=l.length?l.map(s=>{const c=(s.course||s.course_id||'').trim();return `<div class="slot"><div class="srow"><b>${esc(names[c.toLowerCase()]||c)}</b><span>${esc(s.time||'')}</span><span>${esc(s.place||'')}</span></div>${s.note?`<em class="note2">${esc(s.note)}</em>`:''}</div>`}).join(''):'<div class="empty">No sections</div>';
+   slots.innerHTML=l.length?l.map(s=>{const c=(s.course||s.course_id||'').trim();return `<div class="slot"><div class="srow"><b>${s.kind?`<i class="kd">${esc(s.kind.trim().toUpperCase())}</i>`:''}${esc(names[c.toLowerCase()]||c)}</b><span>${esc(s.time||'')}</span><span>${esc(s.place||'')}</span></div>${s.note?`<em class="note2">${esc(s.note)}</em>`:''}</div>`}).join(''):'<div class="empty">No sections</div>';
    pan.classList.add('open')};
   bar.appendChild(b)});
 });
