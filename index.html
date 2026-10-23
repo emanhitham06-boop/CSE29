@@ -47,6 +47,21 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 .drive small{display:block;color:var(--mute);font-size:14px;margin-top:4px}
 .drive.off{opacity:.4;pointer-events:none}
 .drive:focus-visible{outline:3px solid var(--gold2);outline-offset:3px}
+.sched{padding:26px 18px}.sched h2{margin:0 0 16px;font-weight:400;font-size:22px;text-align:center}
+.dbar{display:flex;border:1.5px solid var(--gold);border-radius:999px;overflow:hidden}
+.dbar button{all:unset;box-sizing:border-box;flex:1 0 96px;text-align:center;padding:12px 6px;cursor:pointer;font-size:15px;border-left:1.5px solid var(--gold)}
+.dbar button:first-child{border-left:0}
+.dbar button.on{background:var(--gold);color:#fff}
+.dbar button.today::after{content:'';display:block;width:6px;height:6px;border-radius:50%;background:var(--gold2);margin:2px auto 0}
+.dbar button:focus-visible{outline:3px solid var(--gold2);outline-offset:-3px}
+@media(max-width:700px){.dbar{overflow-x:auto}}
+.spanel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+.spanel.open{grid-template-rows:1fr}.spanel>div{overflow:hidden}
+#slots{display:grid;grid-template-columns:1fr;gap:12px;padding-top:16px}
+.slot{border:2px solid #fff4;border-radius:16px;padding:14px 18px}
+.srow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+.slot b{font-weight:400;font-size:18px;color:var(--gold2);text-align:left}.slot .srow span{color:var(--text);font-size:15px}.slot .srow span:nth-of-type(1){text-align:center}.slot .srow span:nth-of-type(2){text-align:right;color:var(--mute)}
+.slot .note2{display:block;margin-top:8px;padding-top:8px;border-top:1px solid #2a2a2a;font-style:normal;font-size:12px;color:#6f685b;opacity:.9}
 .empty{color:var(--mute);text-align:center;padding:14px}
 @media (prefers-reduced-motion:reduce){.panel{transition:none}html{scroll-behavior:auto}}
 </style>
@@ -60,6 +75,7 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
   <section class="box notes" id="news"><h2>Important Notes</h2><div id="notes"></div></section>
     <a class="box drive" id="drive" href="#" target="_blank" rel="noopener">Drive<small>Year Drive</small></a>
   <section id="courses" style="display:flex;flex-direction:column;gap:28px"></section>
+  <section class="box sched" id="sched"><h2>Weekly Schedule</h2><div class="dbar" id="dbar"></div><div class="spanel" id="spanel"><div><div id="slots"></div></div></div></section>
 </main>
 <script>
 // ===== Google Sheet links (Publish to web > CSV). Leave empty to use demo data =====
@@ -67,6 +83,8 @@ const B='https://docs.google.com/spreadsheets/d/e/2PACX-1vSzntZlO9ctfLIIfK6VcZOG
 const SHEET={courses:B+'1871267128',content:B+'0',news:B+'465799816'};
 const BOARD=['logic','elec'];            // courses that have a Board tab
 const HIDE={isalmic:['section'],islamic:['section']}; // tabs hidden per course
+const DAYS=[['Saturday','sat'],['Sunday','sun'],['Monday','mon'],['Tuesday','tue']]; // schedule days (add ['Tuesday','tue'] ... if needed)
+SHEET.schedule='https://docs.google.com/spreadsheets/d/e/2PACX-1vSzntZlO9ctfLIIfK6VcZOGT4EpUB10PC86KgNJbkLfpFMofiCGKPwzLL9kzZ7OVo4Wjr6VvdXz2p6K/pub?gid=1816910869&single=true&output=csv';
 const NEW_DAYS=6;                         // a card stays yellow/NEW for this many days
 const DRIVE_URL='https://drive.google.com/drive/folders/1blReZcJP06vn4P5b-FFlON0VRItzI0V1';                       // paste the yearly Google Drive link here
 
@@ -81,6 +99,7 @@ const DEMO={
   {course_id:'logic',kind:'board',title:'Board - Week 3',week:3,date:d(-2),image_link:''},
   {course_id:'db',kind:'lecture',title:'Intro to SQL',week:1,date:d(-15),lecture_link:'#',video_link:'#'},
   {course_id:'ds',kind:'lecture',title:'Arrays & Lists',week:1,date:d(-14),lecture_link:'#',video_link:'#'}],
+ schedule:[{day:'Saturday',course:'logic',time:'10:00 AM',place:'Hall 3'},{day:'Saturday',course:'db',time:'12:00 PM',place:'Lab 2'},{day:'Sunday',course:'ds',time:'9:00 AM',place:'Lab 1',note:'Moved to Lab 2 this week'},{day:'Tuesday',course:'logic',time:'1:00 PM',place:'Hall 1'},{day:'Monday',course:'Electronics',time:'11:00 AM',place:'Hall 5'}],
  news:[
   {type:'Quiz',title:'Logic Quiz 1',deadline:d(3),course_id:'logic',link:'#'},
   {type:'Assignment',title:'DB Task 1',deadline:d(6),course_id:'db'},
@@ -97,7 +116,7 @@ function csv(t){const r=[];let row=[],c='',q=false;for(let i=0;i<t.length;i++){c
 async function load(){
  if(!SHEET.courses)return DEMO;
  try{const [c,o,n]=await Promise.all([SHEET.courses,SHEET.content,SHEET.news].map(u=>fetch(u).then(r=>r.text()).then(csv)));
-  [c,o,n].forEach(t=>t.forEach(x=>{Object.keys(x).forEach(k=>{const l=k.trim().toLowerCase();if(l!==k){x[l]=x[k];delete x[k]}})}));o.forEach(x=>{x.kind=(x.kind||x['']||'').toLowerCase();x.course_id=(x.course_id||'').toLowerCase()});c.forEach(x=>x.course_id=(x.course_id||'').toLowerCase());n.forEach(x=>x.course_id=(x.course_id||'').toLowerCase());return{courses:c,content:o,news:n}}catch(e){console.error(e);return DEMO}
+  [c,o,n].forEach(t=>t.forEach(x=>{Object.keys(x).forEach(k=>{const l=k.trim().toLowerCase();if(l!==k){x[l]=x[k];delete x[k]}})}));o.forEach(x=>{x.kind=(x.kind||x['']||'').toLowerCase();x.course_id=(x.course_id||'').toLowerCase()});c.forEach(x=>x.course_id=(x.course_id||'').toLowerCase());n.forEach(x=>x.course_id=(x.course_id||'').toLowerCase());let sc=[];if(SHEET.schedule){try{sc=await fetch(SHEET.schedule).then(r=>r.text()).then(csv);sc.forEach(x=>Object.keys(x).forEach(k=>{const l=k.trim().toLowerCase();if(l!==k){x[l]=x[k];delete x[k]}}))}catch(e){console.error(e)}}return{courses:c,content:o,news:n,schedule:sc}}catch(e){console.error(e);return DEMO}
 }
 const pd=s=>{s=String(s||'').trim();let m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);if(m)return new Date(m[3].length==2?2000+ +m[3]:+m[3],m[2]-1,+m[1]);m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return new Date(+m[1],m[2]-1,+m[3]);return new Date(s)};
 const daysFrom=s=>Math.round((pd(s)-new Date(new Date().toDateString()))/864e5);
@@ -132,6 +151,16 @@ load().then(D=>{
   el.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{el.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');show(t.dataset.k)});
   root.appendChild(el);
  });
+ const names={};D.courses.forEach(c=>{names[c.course_id]=c.name;names[(c.name||'').toLowerCase()]=c.name});
+ const bar=document.getElementById('dbar'),pan=document.getElementById('spanel'),slots=document.getElementById('slots');
+ const tk=['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];let cur=null;
+ DAYS.forEach(([n,k])=>{const b=document.createElement('button');b.textContent=n;if(k==tk)b.classList.add('today');
+  b.onclick=()=>{if(cur===k){cur=null;pan.classList.remove('open');b.classList.remove('on');return}
+   cur=k;bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+   const l=(D.schedule||[]).filter(s=>(s.day||'').trim().slice(0,3).toLowerCase()==k);
+   slots.innerHTML=l.length?l.map(s=>{const c=(s.course||s.course_id||'').trim();return `<div class="slot"><div class="srow"><b>${esc(names[c.toLowerCase()]||c)}</b><span>${esc(s.time||'')}</span><span>${esc(s.place||'')}</span></div>${s.note?`<em class="note2">${esc(s.note)}</em>`:''}</div>`}).join(''):'<div class="empty">No sections</div>';
+   pan.classList.add('open')};
+  bar.appendChild(b)});
 });
 </script>
 </body>
