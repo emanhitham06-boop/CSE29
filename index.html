@@ -47,17 +47,17 @@ main{max-width:900px;margin:0 auto;padding:60px 20px 80px;display:flex;flex-dire
 .drive small{display:block;color:var(--mute);font-size:14px;margin-top:4px}
 .drive.off{opacity:.4;pointer-events:none}
 .drive:focus-visible{outline:3px solid var(--gold2);outline-offset:3px}
-.sched{padding:26px 18px}.sched h2{margin:0 0 16px;font-weight:400;font-size:22px;text-align:center}
-.shead{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;font-size:22px;cursor:pointer;padding:6px 0}
+.sched{padding:26px 18px;border-color:#8a8a8a}.sched h2{margin:0 0 16px;font-weight:400;font-size:22px;text-align:center}
+.shead{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;font-size:22px;color:#b5b5b5;cursor:pointer;padding:6px 0}
 .shead:focus-visible{outline:3px solid var(--gold2);outline-offset:3px}
 .sbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
 .sched.open .sbody{grid-template-rows:1fr}
 .sbody>div{overflow:hidden;padding-top:16px}
-.dbar{display:flex;border:1.5px solid var(--gold);border-radius:999px;overflow:hidden}
-.dbar button{all:unset;box-sizing:border-box;flex:1 0 96px;text-align:center;padding:12px 6px;cursor:pointer;font-size:15px;border-left:1.5px solid var(--gold)}
+.dbar{display:flex;border:1.5px solid #8a8a8a;border-radius:999px;overflow:hidden}
+.dbar button{all:unset;box-sizing:border-box;flex:1 0 96px;text-align:center;padding:12px 6px;cursor:pointer;font-size:15px;border-left:1.5px solid #8a8a8a}
 .dbar button:first-child{border-left:0}
-.dbar button.on{background:var(--gold);color:#fff}
-.dbar button.today::after{content:'';display:block;width:6px;height:6px;border-radius:50%;background:var(--gold2);margin:2px auto 0}
+.dbar button.on{background:#8a8a8a;color:#050505}
+.dbar button.today::after{content:'';display:block;width:6px;height:6px;border-radius:50%;background:#b5b5b5;margin:2px auto 0}
 .dbar button:focus-visible{outline:3px solid var(--gold2);outline-offset:-3px}
 @media(max-width:700px){.dbar{overflow-x:auto}}
 .spanel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
@@ -139,10 +139,10 @@ const KINDS=[['lecture','Lectures'],['section','Sections'],['resource','Resource
 (()=>{const dv=document.getElementById('drive');if(DRIVE_URL)dv.href=DRIVE_URL;else dv.classList.add('off')})();
 load().then(D=>{
  const nd=document.getElementById('notes');
- const news=D.news.filter(n=>daysFrom(n.deadline)>=0).sort((a,b)=>pd(a.deadline)-pd(b.deadline));
- nd.innerHTML=news.length?news.map(n=>{const l=daysFrom(n.deadline);
-  const t=`${esc(n.type)}: ${esc(n.title)}`+(n.link?' ↗':'');
-  return `<div class="note"><span>${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">${t}</a>`:t}<br><small>${esc((n.course_id||'').toUpperCase())}</small></span><span class="left">${l==0?'Today':l+' days left'}</span></div>`}).join(''):'<div class="empty">No upcoming dates</div>';
+ const news=D.news.filter(n=>(n.title||'').trim());
+ nd.innerHTML=news.length?news.map(n=>{const l=n.deadline?daysFrom(n.deadline):null;
+  const t=`${n.type?esc(n.type)+': ':''}${esc(n.title)}`+(n.link?' ↗':'');
+  return `<div class="note"><span>${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">${t}</a>`:t}${n.course_id?`<br><small>${esc(n.course_id.toUpperCase())}</small>`:''}</span>${l===null||isNaN(l)?'':`<span class="left">${l<0?'Ended':l==0?'Today':l+' days left'}</span>`}</div>`}).join(''):'<div class="empty">No notes right now</div>';
 
  const root=document.getElementById('courses');
  D.courses.forEach(c=>{
