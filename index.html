@@ -139,10 +139,10 @@ const KINDS=[['lecture','Lectures'],['section','Sections'],['resource','Resource
 (()=>{const dv=document.getElementById('drive');if(DRIVE_URL)dv.href=DRIVE_URL;else dv.classList.add('off')})();
 load().then(D=>{
  const nd=document.getElementById('notes');
- const news=D.news.filter(n=>(n.title||'').trim());
+ const news=D.news.filter(n=>(n.title||'').trim()&&(!n.deadline||isNaN(daysFrom(n.deadline))||daysFrom(n.deadline)>=0));
  nd.innerHTML=news.length?news.map(n=>{const l=n.deadline?daysFrom(n.deadline):null;
   const t=`${n.type?esc(n.type)+': ':''}${esc(n.title)}`+(n.link?' ↗':'');
-  return `<div class="note"><span>${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">${t}</a>`:t}${n.course_id?`<br><small>${esc(n.course_id.toUpperCase())}</small>`:''}</span>${l===null||isNaN(l)?'':`<span class="left">${l<0?'Ended':l==0?'Today':l+' days left'}</span>`}</div>`}).join(''):'<div class="empty">No notes right now</div>';
+  return `<div class="note"><span>${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">${t}</a>`:t}${n.course_id?`<br><small>${esc(n.course_id.toUpperCase())}</small>`:''}</span>${l===null||isNaN(l)?'':`<span class="left">${l==0?'Today':l+' days left'}</span>`}</div>`}).join(''):'<div class="empty">No notes right now</div>';
 
  const root=document.getElementById('courses');
  D.courses.forEach(c=>{
